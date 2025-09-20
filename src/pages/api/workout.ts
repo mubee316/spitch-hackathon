@@ -1,6 +1,14 @@
 // pages/api/workout.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
+interface ApiError extends Error {
+  status?: number;
+  response?: {
+    status: number;
+    statusText: string;
+  };
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { bodyPart } = req.query; // e.g. abs, legs, back
@@ -30,7 +38,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const selected = shuffled.slice(0, 5);
 
     res.status(200).json(selected);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (error: unknown) {
+    const apiError = error as ApiError;
+    console.error('API Error:', apiError.message || 'Unknown error');
+
+    res.status(500).json({ error: apiError.message });
   }
 }

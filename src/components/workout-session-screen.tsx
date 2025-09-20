@@ -133,13 +133,11 @@ export function WorkoutSessionScreen({
       console.log('✅ TTS completed successfully');
 
     } catch (error: unknown) {
-      if (typeof error === 'object' && error !== null && 'name' in error && (error as { name: string }).name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.log('🔄 TTS request cancelled');
         setTtsStatus('Cancelled');
       } else {
-        const message = typeof error === 'object' && error !== null && 'message' in error
-          ? (error as { message: string }).message
-          : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         console.error('💥 TTS Error:', message);
         setTtsStatus('Failed ❌');
       }

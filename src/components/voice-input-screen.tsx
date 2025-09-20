@@ -38,9 +38,9 @@ export function VoiceInputScreen({
       setTranscript("");
       await recorder.start();
       setIsListening(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Mic access error:", err);
-      setError(`Microphone error: ${err.message}`);
+      setError(`Microphone error: ${err instanceof Error ? err.message : "Unknown error"}`);
     }
   };
 

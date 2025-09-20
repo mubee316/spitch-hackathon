@@ -167,7 +167,7 @@ export function WorkoutSessionScreen({
       setTimeLeft(parseDuration(currentExercise.duration));
       hasSpokenRef.current = false; // Reset spoken flag
     }
-  }, [currentExerciseIndex, currentExercise]);
+  }, [currentExerciseIndex]);
 
   // Auto-speak when exercise changes (only once)
   useEffect(() => {
@@ -254,9 +254,9 @@ export function WorkoutSessionScreen({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // const testTTS = () => {
-  //   speakText("Test message");
-  // };
+  const testTTS = () => {
+    speakText("Test message");
+  };
 
   const speakExerciseDescription = () => {
     if (currentExercise) {

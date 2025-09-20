@@ -108,9 +108,7 @@ export default async function handler(
   } catch (error: unknown) {
     let errorMessage = "Internal server error";
     if (typeof error === "object" && error !== null && "message" in error) {
-      errorMessage = String((error as { message?: string }).message);
-    } else if (typeof error === "string") {
-      errorMessage = error;
+      errorMessage = String((error as { message?: unknown }).message);
     }
     console.error('💥 Transcription error:', errorMessage);
     

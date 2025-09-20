@@ -63,7 +63,7 @@ export function LandingScreen({ onStartWorkout }: LandingScreenProps) {
           size="lg"
           className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-200 rounded-full group"
         >
-          <Mic className="w-5 h-5 mr-3 group-hover:animate-pulse" />
+          <Mic className="w-5 h-5 mr-3 group-hover:animate-pulse cursor-pointer" />
           Start Workout
         </Button>
 

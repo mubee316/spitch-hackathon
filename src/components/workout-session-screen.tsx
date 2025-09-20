@@ -28,6 +28,7 @@ export function WorkoutSessionScreen({
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isLoadingTTS, setIsLoadingTTS] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [ttsStatus, setTtsStatus] = useState<string>('Ready');
   
@@ -50,8 +51,8 @@ export function WorkoutSessionScreen({
   // Smart TTS function that includes name and description
   const speakText = async (text: string) => {
     // Prevent multiple calls
-    if (isSpeaking || !text.trim()) {
-      console.log('🚫 TTS blocked - already speaking or no text');
+    if (isSpeaking || isLoadingTTS || !text.trim()) {
+      console.log('🚫 TTS blocked - already speaking/loading or no text');
       return;
     }
 
@@ -60,7 +61,7 @@ export function WorkoutSessionScreen({
       currentRequestRef.current.abort();
     }
 
-    setIsSpeaking(true);
+    setIsLoadingTTS(true);
     setTtsStatus('Starting...');
     
     // Create new abort controller
@@ -108,6 +109,9 @@ export function WorkoutSessionScreen({
       }
 
       setTtsStatus('Playing...');
+      setIsLoadingTTS(false);
+      setIsSpeaking(true);
+      
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       
@@ -128,25 +132,29 @@ export function WorkoutSessionScreen({
       setTtsStatus('Completed ✅');
       console.log('✅ TTS completed successfully');
 
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'name' in error && (error as { name: string }).name === 'AbortError') {
         console.log('🔄 TTS request cancelled');
         setTtsStatus('Cancelled');
       } else {
-        console.error('💥 TTS Error:', error.message);
+        const message = typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : String(error);
+        console.error('💥 TTS Error:', message);
         setTtsStatus('Failed ❌');
       }
     } finally {
-      if (isMountedRef.current) {
-        setIsSpeaking(false);
-        currentRequestRef.current = null;
-        // Clear status after 2 seconds
-        setTimeout(() => {
-          if (isMountedRef.current) {
-            setTtsStatus('Ready');
-          }
-        }, 2000);
-      }
+      // Always reset both states immediately
+      setIsLoadingTTS(false);
+      setIsSpeaking(false);
+      currentRequestRef.current = null;
+      
+      // Clear status after 1.5 seconds
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          setTtsStatus('Ready');
+        }
+      }, 1500);
     }
   };
 
@@ -161,7 +169,7 @@ export function WorkoutSessionScreen({
       setTimeLeft(parseDuration(currentExercise.duration));
       hasSpokenRef.current = false; // Reset spoken flag
     }
-  }, [currentExerciseIndex]);
+  }, [currentExerciseIndex, currentExercise]);
 
   // Auto-speak when exercise changes (only once)
   useEffect(() => {
@@ -248,9 +256,9 @@ export function WorkoutSessionScreen({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const testTTS = () => {
-    speakText("Test message");
-  };
+  // const testTTS = () => {
+  //   speakText("Test message");
+  // };
 
   const speakExerciseDescription = () => {
     if (currentExercise) {
@@ -303,7 +311,7 @@ export function WorkoutSessionScreen({
       {/* Simple Debug Info */}
       <div className="mb-4 p-3 bg-gray-50 rounded-lg text-sm">
         <div className="flex items-center justify-between">
-          <div>TTS: {ttsStatus}</div>
+          {/* <div>TTS: {ttsStatus}</div> */}
           <div className="flex items-center gap-2">
             <select 
               value={selectedLanguage} 
@@ -316,13 +324,13 @@ export function WorkoutSessionScreen({
               <option value="ig">Igbo</option>
               <option value="ha">Hausa</option>
             </select>
-            <button
+            {/* <button
               onClick={testTTS}
               disabled={isSpeaking}
               className="px-2 py-1 bg-blue-500 text-white rounded text-xs disabled:opacity-50"
             >
               Test
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
@@ -387,10 +395,19 @@ export function WorkoutSessionScreen({
 
           <button
             onClick={speakExerciseDescription}
-            disabled={isSpeaking || !currentExercise}
+            disabled={isSpeaking || isLoadingTTS || !currentExercise}
             className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full font-bold hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg disabled:opacity-50"
           >
-            {isSpeaking ? "🔊" : "🎵"}
+            {isLoadingTTS ? (
+              <span className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                Loading...
+              </span>
+            ) : isSpeaking ? (
+              "🔊 Speaking..."
+            ) : (
+              "🎵 Speak"
+            )}
           </button>
 
           <button

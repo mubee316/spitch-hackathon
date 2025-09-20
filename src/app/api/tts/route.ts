@@ -57,8 +57,12 @@ export async function POST(req: Request) {
       },
     });
 
-  } catch (error: any) {
-    console.error('💥 Error:', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('💥 Error:', error.message);
+    } else {
+      console.error('💥 Error:', error);
+    }
     return NextResponse.json({ error: "TTS failed" }, { status: 500 });
   }
 }

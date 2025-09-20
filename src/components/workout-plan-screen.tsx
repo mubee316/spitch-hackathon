@@ -177,7 +177,7 @@ export function WorkoutPlanScreen({
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-4"></div>
           <h2 className="text-xl font-semibold mb-2">Generating Your Workout Plan</h2>
           <p className="text-muted-foreground text-center">
-            Creating a personalized workout based on: "{workoutRequest}"
+            Creating a personalized workout based on: &quot;{workoutRequest}&quot;
           </p>
         </div>
       </div>
@@ -234,7 +234,7 @@ export function WorkoutPlanScreen({
               <span>{workoutPlan.exercises.filter(ex => ex.type === "exercise").length} exercises</span>
             </div>
             <p className="text-sm text-muted-foreground italic">
-              Generated from: "{workoutRequest}"
+              Generated from: &quot;{workoutRequest}&quot;
             </p>
           </div>
         </Card>

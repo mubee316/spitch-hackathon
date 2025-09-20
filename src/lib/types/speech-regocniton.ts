@@ -9,14 +9,17 @@ const client = new Spitch({ apiKey: process.env.SPITCH_API_KEY! });
  * @param path Path to audio file (e.g. "public/audio/hello.wav")
  * @param language Language code ("en", "yo", "ig", etc.)
  */
-export async function transcribeFile(path: string, language: string = "yo") {
+export async function transcribeFile(
+  path: string,
+  language: "yo" | "en" | "ha" | "ig" | "am" = "yo"
+) {
   try {
     const buffer = fs.readFileSync(path);
     const file = await toFile(buffer, path);
 
     const res = await client.speech.transcribe({
       content: file,
-      language: "yo",
+      language: language,
     });
 
     return res.text; // transcript string
@@ -28,14 +31,20 @@ export async function transcribeFile(path: string, language: string = "yo") {
 
 /**
  * Transcribe audio from a URL
- * @param url Public URL to the audio file
+export async function transcribeUrl(
+  url: string,
+  language: "yo" | "en" | "ha" | "ig" | "am" = "en"
+) {
  * @param language Language code
  */
-export async function transcribeUrl(url: string, language: string = "en") {
+export async function transcribeUrl(
+  url: string,
+  language: "yo" | "en" | "ha" | "ig" | "am" = "en"
+) {
   try {
     const res = await client.speech.transcribe({
       url,
-      language: "yo",
+      language: language,
     });
 
     return res.text;

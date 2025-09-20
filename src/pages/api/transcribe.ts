@@ -1,6 +1,6 @@
 // pages/api/transcribe.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import formidable, { IncomingForm, File } from "formidable";
+import { IncomingForm, File } from "formidable";
 import fs from "fs";
 import Spitch, { toFile } from "spitch";
 import path from "path";
@@ -60,6 +60,12 @@ export default async function handler(
       return res.status(500).json({ error: "API key not configured" });
     }
 
+    // Validate language
+    const allowedLanguages = ["yo", "en", "ha", "ig", "am"] as const;
+    const selectedLanguage = allowedLanguages.includes(language as typeof allowedLanguages[number])
+      ? (language as typeof allowedLanguages[number])
+      : "en";
+
     // Init Spitch client
     const client = new Spitch({ apiKey: process.env.SPITCH_API_KEY });
 
@@ -71,19 +77,23 @@ export default async function handler(
     // Transcribe
     const response = await client.speech.transcribe({
       content: file,
-      language,
+      language: selectedLanguage,
     });
 
     // Cleanup
     fs.unlinkSync(filePath);
 
     return res.status(200).json({ text: response.text || "" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (filePath && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
+    const errorMessage =
+      typeof error === "object" && error !== null && "message" in error
+        ? (error as { message?: string }).message
+        : "Internal server error";
     return res
       .status(500)
-      .json({ error: error.message || "Internal server error" });
+      .json({ error: errorMessage || "Internal server error" });
   }
 }

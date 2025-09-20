@@ -40,7 +40,7 @@ export function VoiceInputScreen({
       setIsListening(true);
     } catch (err: unknown) {
       console.error("Mic access error:", err);
-      setError(`Microphone error: ${err instanceof Error ? err.message : "Unknown error"}`);
+      setError(`Microphone error: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -48,6 +48,8 @@ export function VoiceInputScreen({
     try {
       setIsProcessing(true);
       const [buffer] = await recorder.stop().getMp3();
+      
+      // Fix: Create File from buffer array, not as single blob
       const file = new File([buffer], "recording.mp3", { type: "audio/mp3" });
 
       const formData = new FormData();

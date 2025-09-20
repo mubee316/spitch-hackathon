@@ -48,7 +48,7 @@ export function VoiceInputScreen({
     try {
       setIsProcessing(true);
       const [buffer] = await recorder.stop().getMp3();
-      const file = new File(buffer, "recording.mp3", { type: "audio/mp3" });
+      const file = new File([buffer], "recording.mp3", { type: "audio/mp3" });
 
       const formData = new FormData();
       formData.append("file", file);
